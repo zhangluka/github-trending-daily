@@ -1,28 +1,31 @@
-name: Send GitHub Trending Daily Email
+name: GitHub Trending Daily - 北京时间早8点
 
 on:
   schedule:
-    - cron: '0 11 * * *'        # 每天 UTC 11:00 执行（北京时间晚上 7:00）
-  workflow_dispatch:            # 允许手动触发测试
+    - cron: '0 0 * * *'      # UTC 00:00 = 北京时间 08:00（无夏令时）
+  workflow_dispatch:         # 允许你手动点击测试
 
 jobs:
-  send-email:
+  send-trending:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Get Trending Data & Send Email
-        uses: talljack/github-trending-email@main
-        id: trending
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          # 可选参数（强烈建议配置）
-          language: ''                  # 留空 = 全语言；填 'python'、'go'、'javascript' 等只看特定语言
-          period: 'daily'             # daily / weekly / monthly
-          email_to: 'zhangluuka@gmail.com'
-          # email_from: 'trending@yourdomain.com'   # 可自定义
-          # smtp_host: smtp.gmail.com               # 如果不用 Gmail App Password，可改用其他 SMTP
-          # smtp_port: 587
-          smtp_username: 'zhangluuka@gmail.com'
-          # smtp_password: '629936'
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests beautifulsoup4
+
+      - name: Fetch GitHub Trending (Top 20) and Send Email
+        env:
+          SMTP_HOST: smtp.gmail.com
+          SMTP_PORT: 587
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+        run: python scripts/fetch_trending.py
