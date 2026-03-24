@@ -1,0 +1,28 @@
+name: Send GitHub Trending Daily Email
+
+on:
+  schedule:
+    - cron: '0 11 * * *'        # 每天 UTC 11:00 执行（北京时间晚上 7:00）
+  workflow_dispatch:            # 允许手动触发测试
+
+jobs:
+  send-email:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get Trending Data & Send Email
+        uses: talljack/github-trending-email@main
+        id: trending
+        with:
+          # 可选参数（强烈建议配置）
+          language: ''                  # 留空 = 全语言；填 'python'、'go'、'javascript' 等只看特定语言
+          period: 'daily'             # daily / weekly / monthly
+          email_to: 'zhangluuka@gmail.com'
+          # email_from: 'trending@yourdomain.com'   # 可自定义
+          # smtp_host: smtp.gmail.com               # 如果不用 Gmail App Password，可改用其他 SMTP
+          # smtp_port: 587
+          smtp_username: 'zhangluuka@gmail.com'
+          # smtp_password: '629936'
